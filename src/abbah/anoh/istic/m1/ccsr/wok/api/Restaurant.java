@@ -1,5 +1,7 @@
 package abbah.anoh.istic.m1.ccsr.wok.api;
 
+import abbah.anoh.istic.m1.ccsr.wok.core.Client;
+
 /**
  * Is the main program. It has a limited number of places.
  */
@@ -21,14 +23,24 @@ public interface Restaurant {
     /**
      * Is the buffet stand.
      *
-     * @param c The client who wants to access the buffet.
+     * @param client The client who wants to access the buffet.
      */
-    void buffet(Client c);
+    void buffet(Client client);
+
+    /**
+     * Watches the bins
+     */
+    void watchBuffet();
 
     /**
      * Is the cooking stand.
      *
      * @param c The client who is waiting for the cook.
      */
-    void cooking(Client c);
+    void cookingStand(Client c);
+
+    /**
+     * Has finished cooking.
+     */
+    void cooking();
 }
