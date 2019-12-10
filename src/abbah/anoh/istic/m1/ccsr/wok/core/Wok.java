@@ -31,19 +31,9 @@ public class Wok implements Restaurant {
     private boolean shouldEmployeeIdle = true;
 
     /**
-     * Checks if there is a client at the fish bin.
-     */
-    private boolean isUsedFishBin = false;
-
-    /**
      * The current noodle bin volume, initializes at the maximum volume.
      */
     private int noodleBin = MAX_BINS_VOLUME;
-
-    /**
-     * Checks if there is a client at the noodle bin.
-     */
-    private boolean isUsedNoodleBin = false;
 
     /**
      * The current meat bin volume, initializes at the maximum volume.
@@ -51,19 +41,9 @@ public class Wok implements Restaurant {
     private int meatBin = MAX_BINS_VOLUME;
 
     /**
-     * Checks if there is a client at the meat bin.
-     */
-    private boolean isUsedMeatBin = false;
-
-    /**
      * The current vegetable bin volume, initializes at the maximum volume.
      */
     private int vegetableBin = MAX_BINS_VOLUME;
-
-    /**
-     * Checks if there is a client at the vegetable bin.
-     */
-    private boolean isUsedVegetableBin = false;
 
     /**
      * The total number of clients present in the restaurant.
@@ -109,7 +89,7 @@ public class Wok implements Restaurant {
     public synchronized void exit(Client c) {
         System.out.printf("The %s leaved the restaurant.\n", c.getName());
         --this.clientsCount;
-        notify();
+        notifyAll();
     }
 
     /**
@@ -141,13 +121,10 @@ public class Wok implements Restaurant {
             wait();
         }
 
-        System.out.printf("The %s is using the meat bin.\n", client.getName());
-        this.isUsedMeatBin = true;
-        this.sleep();
         this.meatBin -= quantity;
         client.setMeat(quantity);
-        this.isUsedMeatBin = false;
-        notify();
+        System.out.printf("The %s is using the meat bin.\n", client.getName());
+        this.sleep();
     }
 
     private synchronized void fishBin(final Client client, final int quantity) throws InterruptedException {
@@ -158,13 +135,10 @@ public class Wok implements Restaurant {
             wait();
         }
 
-        System.out.printf("The %s is using the fish bin.\n", client.getName());
-        this.isUsedFishBin = true;
-        this.sleep();
         this.fishBin -= quantity;
         client.setFish(quantity);
-        this.isUsedFishBin = false;
-        notify();
+        System.out.printf("The %s is using the fish bin.\n", client.getName());
+        this.sleep();
     }
 
     private synchronized void noodleBin(final Client client, final int quantity) throws InterruptedException {
@@ -175,13 +149,10 @@ public class Wok implements Restaurant {
             wait();
         }
 
-        System.out.printf("The %s is using noodles bin.\n", client.getName());
-        this.isUsedNoodleBin = true;
-        this.sleep();
         this.noodleBin -= quantity;
         client.setNoodle(quantity);
-        this.isUsedNoodleBin = false;
-        notify();
+        System.out.printf("The %s is using noodles bin.\n", client.getName());
+        this.sleep();
     }
 
     private synchronized void vegetableBin(final Client client, final int quantity) throws InterruptedException {
@@ -192,13 +163,10 @@ public class Wok implements Restaurant {
             wait();
         }
 
-        System.out.printf("The %s is using vegetables bin.\n", client.getName());
-        this.isUsedVegetableBin = true;
-        this.sleep();
         this.vegetableBin -= quantity;
         client.setVegetable(quantity);
-        this.isUsedVegetableBin = false;
-        notify();
+        System.out.printf("The %s is using vegetables bin.\n", client.getName());
+        this.sleep();
     }
 
     /**
@@ -226,17 +194,6 @@ public class Wok implements Restaurant {
 
     private synchronized void fillMeatBin() {
         if (this.meatBin <= Wok.MIN_BINS_VOLUME) {
-            while (this.isUsedMeatBin) {
-                try {
-                    String str = "The buffet employee is waiting" +
-                            " to fill the meat bin.";
-                    System.out.println(str);
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
             System.out.print("The buffet employee is filling the meat bin.\n");
             this.meatBin = Wok.MAX_BINS_VOLUME;
         }
@@ -244,16 +201,6 @@ public class Wok implements Restaurant {
 
     private synchronized void fillFishBin() {
         if (this.fishBin <= Wok.MIN_BINS_VOLUME) {
-            while (this.isUsedFishBin) {
-                try {
-                    String str = "The buffet employee is waiting" +
-                            " to fill the fish bin.";
-                    System.out.println(str);
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
             System.out.print("The buffet employee is filling the fish bin.\n");
             this.fishBin = Wok.MAX_BINS_VOLUME;
         }
@@ -261,17 +208,6 @@ public class Wok implements Restaurant {
 
     private synchronized void fillNoodleBin() {
         if (this.noodleBin <= Wok.MIN_BINS_VOLUME) {
-            while (this.isUsedNoodleBin) {
-                try {
-                    String str = "The buffet employee is waiting" +
-                            " to fill the vegetable bin.";
-                    System.out.println(str);
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
             System.out.print("The employee is filling noodles bin.\n");
             this.noodleBin = Wok.MAX_BINS_VOLUME;
         }
@@ -279,17 +215,6 @@ public class Wok implements Restaurant {
 
     private synchronized void fillVegetableBin() {
         if (this.vegetableBin <= Wok.MIN_BINS_VOLUME) {
-            while (this.isUsedVegetableBin) {
-                try {
-                    String str = "The buffet employee is waiting" +
-                            " to fill the vegetable bin.";
-                    System.out.println(str);
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
             System.out.print("The employee is filling vegetables bin.\n");
             this.vegetableBin = Wok.MAX_BINS_VOLUME;
         }
@@ -307,19 +232,22 @@ public class Wok implements Restaurant {
 
     private synchronized void enqueue(final Client client) {
         while (Objects.nonNull(this.clientAtCooking)) {
-            System.out.printf("The %s is waiting to access the cooking.\n", client.getName());
+            System.out.printf("The %s is lining up at the cooking booth.\n", client.getName());
             try {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+        clientAtCooking = client;
     }
 
+    private boolean isCooking = false;
     private synchronized void atCooking(final Client client) {
-        while (Objects.isNull(this.clientAtCooking)) {
-            this.clientAtCooking = client;
-            notifyAll();
+        isCooking = true;
+        notifyAll();
+        while (isCooking) {
             System.out.printf("The %s is waiting at the cooking.\n", client.getName());
             try {
                 wait();
@@ -328,6 +256,8 @@ public class Wok implements Restaurant {
             }
         }
 
+        clientAtCooking = null;
+        notifyAll();
         System.out.printf("The %s is eating.\n", client.getName());
     }
 
@@ -337,16 +267,16 @@ public class Wok implements Restaurant {
     @Override
     public synchronized void cooking() {
         try {
-            while (Objects.isNull(this.clientAtCooking)) {
+            while (!isCooking) {
                 System.out.println("The cook is waiting for a client.");
                 wait();
             }
 
             System.out.printf("The cook is cooking %s dish.\n", clientAtCooking.getName());
             Thread.sleep(new Random().nextInt(1000));
-            System.out.println("The cook has finished the dish.");
-            this.clientAtCooking = null;
-            notifyAll();
+            System.out.printf("The cook has finished the %s dish.\n", clientAtCooking.getName());
+            this.isCooking = false;
+            notify();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
