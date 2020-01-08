@@ -60,8 +60,8 @@ puis attendre la fin de la cuisson de son plat ;
 Une fois que votre simulation vous semble satisfaisante, vous devrez développer une API
 Rest permettant de la contrˆoler. Plus précisément, en utilisant la librairie Restlet, vous devrez
 développer une API permettant de :
- - lister les clients avec leur état (GET /client/{client_id})
- - retourner l’état du buffet (GET /buffet).
+ - lister les clients avec leur état (`GET /client/{client_id}`)
+ - retourner l’état du buffet (`GET /buffet`).
  
  Les clients auront successivement les états suivants :
    1. `WAITING_TO_ENTER` - en attente pour rentrer
